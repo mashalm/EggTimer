@@ -58,36 +58,11 @@ decEn, flashEn, secsSet, minsSet);
 			end
 		endcase
 	end
-	
-	/*
-	reg[3:0] state;
-	reg hex3, hex2, hex1, hex0;
-	reg[9:0] ledr;
-	always @(state) begin	
-		case (state) begin
-			Reset: {hex3, hex2, hex1, hex0, ledr} <= 14'b00000000000000;
-			SetSec: begin
-		    {hex3, hex2} <= 00;
-			 {hex1, hex0} <= {SW[7:4], SW[3:0]};
-			 {SW[7:4], SW[3:0]} <=
-		//  {hex3, hex2, hex1, hex0, ledr} <= 14'b00  0000000000; // not sure how to represent hex1 and hex0
-			end
-			SetMin:begin
-		    {hex3, hex2} <= {SW[7:4], SW[3:0]};
-			 {hex1, hex0} <= {secondstens, secondsones};
-	//	  {hex3, hex2, hex1, hex0, ledr} <= 14'b00  0000000000; // not sure how to represent hex1 and hex0
-			end {hex3, hex2, hex1, hex0, ledr} <= 14'b    0000000000; // not sure how to represent hex3 and hex2
-			SetTimer: {hex3, hex2, hex1, hex0, ledr} <= 14'b    0000000000; // same as SetMin
-			RunTimer: {hex3, hex2, hex1, hex0, ledr} <= ; // not sure how to represent decrementing hex
-			TurnLightsOn: {hex3, hex2, hex1, hex0, ledr} <= 14'b00001111111111;
-			TurnLightsOff: {hex3, hex2, hex1, hex0, ledr} <= 14'b00000000000000;
-		end
-	end
-	*/
+
 	
 	// state transition goes here
 	// reg reset, set, startStop, isTimeFlat;
-	always @(posedge clk) begin
+	always @(negedge clk or negedge reset) begin
 		secsSet <= false;
 		minsSet <= false;
 			case (state) 
