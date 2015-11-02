@@ -21,26 +21,40 @@ decEn, flashEn, secsSet, minsSet);
 			end
 			*/
 			SetSec: begin
-				swSecEn = true;
+				swSecEn <= true;
+				swMinEn <= false;
+				decEn <= false;
+				flashEn <= false;
 			end
 			SetMin: begin
-				swSecEn = false;
-				swMinEn = true;
+				swSecEn <= false;
+				swMinEn <= true;
+				decEn <= false;
+				flashEn <= false;
 			end
 			SetTimer: begin
-				swMinEn = false;
+				swSecEn <= false;
+				swMinEn <= false;
+				decEn <= false;
+				flashEn <= false;
 			end
 			RunTimer: begin
-				decEn = true;
+				decEn <= true;
+				swSecEn <= false;
+				swMinEn <= false;
+				flashEn <= false;
 			end
 			Flash: begin
-				flashEn = true; // turn on the LED
+				flashEn <= true; // turn on the LED
+				swSecEn <= false;
+				swMinEn <= false;
+				decEn <= false;
 			end
 			default: begin
-				swSecEn = false;
-				swMinEn = false;
-				decEn = false;
-				flashEn = false;
+				swSecEn <= false;
+				swMinEn <= false;
+				decEn <= false;
+				flashEn <= false;
 			end
 		endcase
 	end
@@ -74,11 +88,16 @@ decEn, flashEn, secsSet, minsSet);
 	// state transition goes here
 	// reg reset, set, startStop, isTimeFlat;
 	always @(posedge clk) begin
+		secsSet <= false;
+		minsSet <= false;
 			case (state) 
 				// in all states, if reset is 1 then do state <= Reset
 				Reset: begin
 					// after one clock cycle, move on to SetSec
-					state <= SetSec;
+					//state <= SetSec;
+					if(set) begin
+						state <= SetSec;
+					end
 				end
 				SetSec: begin
 					if (reset)
@@ -92,7 +111,7 @@ decEn, flashEn, secsSet, minsSet);
 						state <= Reset;
 					else if (set)
 						state <= SetTimer;
-						minsSet = true;
+						minsSet <= true;
 				end
 				SetTimer: begin
 					if (reset)

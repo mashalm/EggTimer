@@ -14,6 +14,7 @@ module EggTimer(CLOCK_50, KEY, SW, HEX3, HEX2, HEX1, HEX0, LEDR);
 	wire clk = CLOCK_50;
 	
 	//declare the wires for the controller here
+	wire isSecsFlat, isMinsFlat;
 	wire isTimeFlat = isSecsFlat & isMinsFlat;
 	wire decEn, minsSet, secsSet, flashEn, inSetSecsState, inSetMinsState;
 	//declare the controller itself here
@@ -21,7 +22,7 @@ module EggTimer(CLOCK_50, KEY, SW, HEX3, HEX2, HEX1, HEX0, LEDR);
 	.isTimeFlat(isTimeFlat), .swSecEn(inSetSecsState), .swMinEn(inSetMinsState), 
 	.decEn(decEn), .flashEn(flashEn), .secsSet(secsSet), .minsSet(minsSet));
 
-	//these will be the regs holding the set values
+	//these will be the wires holding the set values
 	wire[7:0] initialSecsValue = (secsSet ? SW : 8'b00000000);
 	wire[7:0] initialMinsValue = (minsSet ? SW : 8'b00000000);
 	
@@ -30,13 +31,13 @@ module EggTimer(CLOCK_50, KEY, SW, HEX3, HEX2, HEX1, HEX0, LEDR);
 	ClockDivider oneSecDiv(.clk(clk), .reset(reset), .clockOut(oneSec));
 	
 	wire[7:0] decrementedSecs;
-	wire isSecsFlat;
-	DecrementTime decSecs(.clk(clk), .writeEnable(secsSet), .decrementEnable(decEn & oneSec), 
+	//wire isSecsFlat;
+	DecrementTime decSecs(.clk(clk), .reset(reset), .writeEnable(secsSet), .decrementEnable(decEn & oneSec), 
 		.inputTime(initialSecsValue), .outputTime(decrementedSecs), .isZero(isSecsFlat));
 	
 	wire[7:0] decrementedMins;
-	wire isMinsFlat;
-	DecrementTime decMins(.clk(clk), .writeEnable(minsSet), .decrementEnable(decEn & oneSec), 
+	//wire isMinsFlat;
+	DecrementTime decMins(.clk(clk), .reset(reset), .writeEnable(minsSet), .decrementEnable(decEn & oneSec & isSecsFlat), 
 		.inputTime(initialMinsValue), .outputTime(decrementedMins), .isZero(isMinsFlat));
 	
 	//clock divider for flashing lights
@@ -45,9 +46,9 @@ module EggTimer(CLOCK_50, KEY, SW, HEX3, HEX2, HEX1, HEX0, LEDR);
 
 	FlashLights fl(.clk(clk), .flashEn(flashEn & halfSec), .ledr(LEDR));
 	
-	dec2_7seg d1(.num(inSetSecsState ? SW[3:0] : decrementedSecs[3:0]), .display(HEX0));
-	dec2_7seg d2(.num(inSetSecsState ? SW[7:4] : decrementedSecs[7:4]), .display(HEX1));
-	dec2_7seg d3(.num(inSetMinsState ? SW[3:0] : decrementedMins[3:0]), .display(HEX2));
-	dec2_7seg d4(.num(inSetMinsState ? SW[7:4] : decrementedMins[7:4]), .display(HEX3));
+	dec2_7seg d1(.num((inSetSecsState==1'b1) ? SW[3:0] : decrementedSecs[3:0]), .display(HEX0));
+	dec2_7seg d2(.num((inSetSecsState==1'b1) ? SW[7:4] : decrementedSecs[7:4]), .display(HEX1));
+	dec2_7seg d3(.num((inSetMinsState==1'b1) ? SW[3:0] : decrementedMins[3:0]), .display(HEX2));
+	dec2_7seg d4(.num((inSetMinsState==1'b1) ? SW[7:4] : decrementedMins[7:4]), .display(HEX3));
 	
 endmodule

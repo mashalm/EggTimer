@@ -2,9 +2,11 @@ module ClockDivider(clk, reset, clockOut);
 	parameter frequency = 50000000;
 
 	input clk, reset;
-	output reg clockOut;
-	///reg clockOut;
+	output clockOut;
+	reg clkOut = 0;
 	//wire clockOut = clk;
+	
+	assign clockOut = clkOut;
 	
 	reg[31:0] counter = 0;
 
@@ -14,7 +16,7 @@ module ClockDivider(clk, reset, clockOut);
 			counter <= 32'd0;
 		else begin
 			if(counter == frequency) begin
-				clockOut <= ~clockOut;
+				clkOut <= ~clkOut;
 				counter <= 32'd0;
 			end
 		end //else
